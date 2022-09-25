@@ -6,15 +6,14 @@ USE employee_db;
 -- Creating Tables 
 CREATE TABLE department (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(30),
+    dept_name VARCHAR(30)
 );
 
-CREATE TABLE role (
+CREATE TABLE roles (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(30),
     salery DECIMAL,
-    department_id INT NOT NULL,
-    FOREIGN KEY (department_id)
+    department_id INT
 );
 
 CREATE TABLE employee (
