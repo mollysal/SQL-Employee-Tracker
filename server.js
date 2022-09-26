@@ -1,5 +1,6 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
+const { connect } = require("http2");
 require("console.table");
 
 // mysql connection
@@ -29,6 +30,7 @@ connection.connect(function (err) {
     firstPrompt();
 });
 
+// firstPromt asking user to make their firstSelection from a list
 function firstPrompt() {
     inquirer.prompt([
         {
@@ -47,6 +49,7 @@ function firstPrompt() {
             ]
         }
     ]).then((res) => {
+        // Once the selction is made run the correlating function
         console.log(res.firstSelection);
         switch (res.firstSelection) {
             case 'View All Departments':
@@ -77,4 +80,70 @@ function firstPrompt() {
     }).catch((err) =>{
         if(err)throw err;
     });
+};
+
+// View all Dept
+function viewAllDept() {
+    let query = 
+    `SELECT
+    department.id,
+    department.dept_name AS department
+    FROM department
+    `
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        console.log("---   Departments   ---");
+        console.table(res);
+        firstPrompt();
+    });
 }
+
+// View all Roles
+function viewAllRoles() {
+    let query = 
+    `SELECT
+    roles.id AS ID,
+    roles.title AS Title,
+    roles.salery AS Salery
+    department.dept_name AS department
+    FROM roles
+    INNER JOIN deparment ON roles.department_id = deptarment.id
+    `
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        console.log("---   Roles   ---");
+        console.table(res);
+        firstPrompt();
+    });
+}
+
+// View all Employees
+function viewAllEmp() {
+    let query = 
+    `SELECT
+    employee.id,
+    employee.first_name AS First_Name,
+    employee.last AS Last_Name,
+    roles.title AS Title,
+    roles.salery AS Salery.
+    department.dept_name AS department
+    FROM employee
+    INNER JOIN roles ON roles.id = employee.role_id
+    INNER JOIN department ON deparment.id = roles.department_id
+    LEFT JOIN employees
+    `
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        console.log("---   Roles   ---");
+        console.table(res);
+        firstPrompt();
+    });
+}
+
+// Add a Department
+
+// Add a Role
+
+// Add an Employee
+
+// Update an Employee Role
