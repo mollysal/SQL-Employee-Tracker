@@ -1,6 +1,5 @@
-const mysql = require("mysql");
+const mysql = require("mysql2");
 const inquirer = require("inquirer");
-const { connect } = require("http2");
 require("console.table");
 
 // mysql connection
@@ -30,12 +29,12 @@ connection.connect(function (err) {
     firstPrompt();
 });
 
-// firstPromt asking user to make their firstSelection from a list
+// firstPrompt asking user to make their firstSelection from a list
 function firstPrompt() {
     inquirer.prompt([
         {
             type: "list",
-            name: "firstSelction",
+            name: "firstSelection",
             message: "What do you want to do?",
             choices: [
                 'View All Departments',
@@ -46,10 +45,11 @@ function firstPrompt() {
                 'Add an Employee',
                 'Update an Employee Role',
                 'Exit'
+                // Bonus: Update Employee Manager, View Employees by Manager, View Employees by Department, Delete Department, Roles & Employees 
             ]
         }
     ]).then((res) => {
-        // Once the selction is made run the correlating function
+        // Once the selection is made run the correlating function
         console.log(res.firstSelection);
         switch (res.firstSelection) {
             case 'View All Departments':
@@ -77,19 +77,14 @@ function firstPrompt() {
                 connection.end();
                 break;
         }
-    }).catch((err) =>{
-        if(err)throw err;
+    }).catch((err) => {
+        if (err) throw err;
     });
 };
 
 // View all Dept
-function viewAllDept() {
-    let query = 
-    `SELECT
-    department.id,
-    department.dept_name AS department
-    FROM department
-    `
+viewAllDept = () => {
+    let query = `SELECT * FROM department`
     connection.query(query, (err, res) => {
         if (err) throw err;
         console.log("---   Departments   ---");
@@ -99,15 +94,15 @@ function viewAllDept() {
 }
 
 // View all Roles
-function viewAllRoles() {
-    let query = 
-    `SELECT
+viewAllRoles = () => {
+    let query =
+        `SELECT
     roles.id AS ID,
     roles.title AS Title,
-    roles.salery AS Salery
-    department.dept_name AS department
+    roles.salary AS Salary,
+    department.dept_name
     FROM roles
-    INNER JOIN deparment ON roles.department_id = deptarment.id
+    INNER JOIN department ON roles.department_id = department.id
     `
     connection.query(query, (err, res) => {
         if (err) throw err;
@@ -118,20 +113,21 @@ function viewAllRoles() {
 }
 
 // View all Employees
-function viewAllEmp() {
-    let query = 
-    `SELECT
-    employee.id,
+viewAllEmp = () => {
+    let query =
+        `SELECT
+    employee.id as ID,
     employee.first_name AS First_Name,
     employee.last AS Last_Name,
     roles.title AS Title,
-    roles.salery AS Salery.
-    department.dept_name AS department
+    roles.salary AS Salary,
+    CONCAT(manager.first_name, ' ', manager.last_name) AS manager
     FROM employee
-    INNER JOIN roles ON roles.id = employee.role_id
-    INNER JOIN department ON deparment.id = roles.department_id
-    LEFT JOIN employees
+    LEFT JOIN roles ON employee.roles_id = roles.id
+    LEFT JOIN department ON roles.department_id =  department.id
+    LEFT JOIN employee manager ON employee.manager_id = manager.id
     `
+
     connection.query(query, (err, res) => {
         if (err) throw err;
         console.log("---   Roles   ---");
@@ -141,8 +137,47 @@ function viewAllEmp() {
 }
 
 // Add a Department
+addDept = () => {
+    // Prompt to enter name of department
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "addDept",
+            message: "Please type the name of the department you want to add."
+        }
+    ]).then((res) => {
+        // Dept added to database
+        console.log("Department Added")
+        let query = `INSERT INTO department (dept_name) VALUES ('${res.addDept}')`;
+        connection.query(query, res.addDept, (err, res) => {
+            if (err) throw err;
+            console.log('Department Added')
+            firstPrompt();
+        })
 
+    })
+}
 // Add a Role
+addRole = () => {
+    // Prompt to enter name of department
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "addRole",
+            message: "Please type the name of the department you want to add."
+        }
+    ]).then((res) => {
+        // Dept added to database
+        console.log("Department Added")
+        let query = `INSERT INTO department (dept_name) VALUES ('${res.addDept}')`;
+        connection.query(query, res.addDept, (err, res) => {
+            if (err) throw err;
+            console.log('Department Added')
+            firstPrompt();
+        })
+
+    })
+}
 
 // Add an Employee
 
