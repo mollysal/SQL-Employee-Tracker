@@ -164,21 +164,34 @@ addRole = () => {
         {
             type: "input",
             name: "addRole",
-            message: "Please type the name of the department you want to add."
+            message: "Please type the title of the role you want to add."
+        },
+        {
+            type: "input",
+            name: "roleSalary",
+            message: "Please type the salary of the role you just added."
+        },
+        {
+            type: "input",
+            name: "roleDept",
+            message: "Please enter the department name associated with this role"
         }
     ]).then((res) => {
-        // Dept added to database
-        console.log("Department Added")
-        let query = `INSERT INTO department (dept_name) VALUES ('${res.addDept}')`;
-        connection.query(query, res.addDept, (err, res) => {
-            if (err) throw err;
-            console.log('Department Added')
+        // Need to add role to a department that already exists 
+        let query = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`
+
+
+        connection.query(query, [res.addRole, res.roleSalary, res.roleDept], (err, res) => {
+            if (err) {console.log(err)};
+            console.log('Role created');
             firstPrompt();
         })
-
     })
 }
 
 // Add an Employee
+addEmp = () => {
+    
+}
 
 // Update an Employee Role
