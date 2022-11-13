@@ -6,7 +6,9 @@ VALUES ("Engineering"),
         ("Accounting"),
         ("Legal");
 
-INSERT INTO roles (title, salery, department_id)
+SELECT * FROM department;
+
+INSERT INTO roles (title, salary, department_id)
 VALUES ("Lead Engineer", 150000, 1),
         ("Jr. Engineer", 90000, 1),
         ("Lead UI/UX Designer", 95000, 2),
@@ -16,6 +18,7 @@ VALUES ("Lead Engineer", 150000, 1),
         ("Lead Lawyer", 200000, 4),
         ("Jr. Lawyer", 150000, 4);
 
+SELECT * FROM roles;
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
 VALUES ("Tony", "Stark", 1, 3),
         ("Bruce", "Banner", 2, 1),
@@ -25,3 +28,5 @@ VALUES ("Tony", "Stark", 1, 3),
         ("Doctor", "Strange", 6, NULL),
         ("Peter", "Quill", 7, 8),
         ("Peter", "Parker", 8, 6);
+
+SELECT * FROM employee;

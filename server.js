@@ -11,7 +11,7 @@ const connection = mysql.createConnection(
         // MySQL username,
         user: "root",
         // MySQL password
-        password: " ",
+        password: "Mysql123!",
         database: "employee_db"
     },
     console.log(`Connected to the employee_db database.`)
@@ -118,12 +118,12 @@ viewAllEmp = () => {
         `SELECT
     employee.id as ID,
     employee.first_name AS First_Name,
-    employee.last AS Last_Name,
+    employee.last_name AS Last_Name,
     roles.title AS Title,
     roles.salary AS Salary,
     CONCAT(manager.first_name, ' ', manager.last_name) AS manager
     FROM employee
-    LEFT JOIN roles ON employee.roles_id = roles.id
+    LEFT JOIN roles ON employee.role_id = roles.id
     LEFT JOIN department ON roles.department_id =  department.id
     LEFT JOIN employee manager ON employee.manager_id = manager.id
     `
@@ -191,7 +191,37 @@ addRole = () => {
 
 // Add an Employee
 addEmp = () => {
-    
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "firstName",
+            message: "Please enter the first name of the new Employee",
+        },
+        {
+            type: "input",
+            name: "lastName",
+            message: "Please enter the last name of the new Employee",
+        },
+        {
+            type: "input",
+            name: "role",
+            message: "Please enter the role of the new Employee",
+        },
+        {
+            type: "input",
+            name: "manager",
+            message: "Please enter the manager of the new Employee",
+        }
+    ]).then((res) => {
+        let query = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES(?, ?, ?, ?)`;
+        connection.query(query, [res.firstName, res.lastName, res.role_id, res.manager_id], (err, res) => {
+            if (err) {console.log(err)};
+            console.log('Employee Created');
+            firstPrompt();
+        })
+    })
 }
 
 // Update an Employee Role
+
+firstPrompt();
