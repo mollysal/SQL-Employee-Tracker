@@ -160,23 +160,6 @@ addDept = () => {
 
 // Add a Role
 addRole = () => {
-    // // Need to Connect Existing Department to ADD a Role for choices:
-    // let query = `
-    // SELECT department.id, department.dept_name, roles.salary
-    // FROM employee 
-    // JOIN roles ON employee.role_id = roles.id
-    // JOIN department on department.id = roles.department_id
-    // GROUP BY department.id, department.dept_name
-    // `
-
-    // connection.query(query, (err, res) => {
-    //     if (err) throw err;
-    //     const department = res.map(({ id, dept_name }) => ({
-    //         value: id,
-    //         name: `${id} ${dept_name}`
-    //     }));
-    //     console.table(res);
-
     inquirer.prompt([
         {
             type: "input",
@@ -187,13 +170,7 @@ addRole = () => {
             type: "input",
             name: "roleSalary",
             message: "Please type the salary of the role you just added."
-        },
-        // {
-        //     type: "list",
-        //     name: "roleDept",
-        //     message: "Please enter the department name associated with this role",
-        //     choices: department
-        // }
+        }
     ]).then((res) => {
         // taking the previous inputs into a variable
         const roleData = [res.addRole, res.roleSalary];
@@ -201,6 +178,7 @@ addRole = () => {
         const getDept = `SELECT dept_name, id FROM department`;
         connection.query(getDept, (err, data) => {
             if (err) throw (err);
+            // Mapping the department data into choices for Inquirer Prompt
             const dept = data.map(({ dept_name, id }) => ({ name: dept_name, value: id }));
             inquirer.prompt([
                 {
@@ -210,15 +188,16 @@ addRole = () => {
                     choices: dept
                 }
             ]).then(updatedAns => {
+                // Adding department answer to a variable
                 const dept = updatedAns.roleDept;
                 // Updating roleData array (From above)
                 roleData.push(dept);
 
-                // Inserting the new role into the table
+                // Inserting the new role into the ROLES table
                 const updateRole = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
                 connection.query(updateRole, roleData, (err, res) => {
                     if (err) throw err;
-                    console.log('New Role has been added!')
+                    console.log('--- New Role has been added! ---')
                     firstPrompt();
                 })
 
