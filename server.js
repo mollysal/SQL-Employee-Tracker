@@ -147,44 +147,82 @@ addDept = () => {
         }
     ]).then((res) => {
         // Dept added to database
-        console.log("Department Added")
         let query = `INSERT INTO department (dept_name) VALUES ('${res.addDept}')`;
-        connection.query(query, res.addDept, (err, res) => {
+        connection.query(query, (err, res) => {
             if (err) throw err;
             console.log('Department Added')
+            console.table(res);
             firstPrompt();
         })
 
     })
 }
+
 // Add a Role
 addRole = () => {
-    // Prompt to enter name of department
+    // // Need to Connect Existing Department to ADD a Role for choices:
+    // let query = `
+    // SELECT department.id, department.dept_name, roles.salary
+    // FROM employee 
+    // JOIN roles ON employee.role_id = roles.id
+    // JOIN department on department.id = roles.department_id
+    // GROUP BY department.id, department.dept_name
+    // `
+
+    // connection.query(query, (err, res) => {
+    //     if (err) throw err;
+    //     const department = res.map(({ id, dept_name }) => ({
+    //         value: id,
+    //         name: `${id} ${dept_name}`
+    //     }));
+    //     console.table(res);
+
     inquirer.prompt([
         {
             type: "input",
             name: "addRole",
-            message: "Please type the title of the role you want to add."
+            message: "Please type the role you want to add."
         },
         {
             type: "input",
             name: "roleSalary",
             message: "Please type the salary of the role you just added."
         },
-        {
-            type: "input",
-            name: "roleDept",
-            message: "Please enter the department name associated with this role"
-        }
+        // {
+        //     type: "list",
+        //     name: "roleDept",
+        //     message: "Please enter the department name associated with this role",
+        //     choices: department
+        // }
     ]).then((res) => {
-        // Need to add role to a department that already exists 
-        let query = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`
+        // taking the previous inputs into a variable
+        const roleData = [res.addRole, res.roleSalary];
+        // Need to get Departments from the Department Table
+        const getDept = `SELECT dept_name, id FROM department`;
+        connection.query(getDept, (err, data) => {
+            if (err) throw (err);
+            const dept = data.map(({ dept_name, id }) => ({ name: dept_name, value: id }));
+            inquirer.prompt([
+                {
+                    type: "list",
+                    name: "roleDept",
+                    message: "Please enter the department name associated with this role",
+                    choices: dept
+                }
+            ]).then(updatedAns => {
+                const dept = updatedAns.roleDept;
+                // Updating roleData array (From above)
+                roleData.push(dept);
 
+                // Inserting the new role into the table
+                const updateRole = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
+                connection.query(updateRole, roleData, (err, res) => {
+                    if (err) throw err;
+                    console.log('New Role has been added!')
+                    firstPrompt();
+                })
 
-        connection.query(query, [res.addRole, res.roleSalary, res.roleDept], (err, res) => {
-            if (err) {console.log(err)};
-            console.log('Role created');
-            firstPrompt();
+            })
         })
     })
 }
@@ -215,7 +253,7 @@ addEmp = () => {
     ]).then((res) => {
         let query = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES(?, ?, ?, ?)`;
         connection.query(query, [res.firstName, res.lastName, res.role_id, res.manager_id], (err, res) => {
-            if (err) {console.log(err)};
+            if (err) { console.log(err) };
             console.log('Employee Created');
             firstPrompt();
         })
@@ -224,4 +262,3 @@ addEmp = () => {
 
 // Update an Employee Role
 
-firstPrompt();
