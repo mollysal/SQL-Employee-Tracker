@@ -293,10 +293,10 @@ updateEmpRole = () => {
                 choices: emp
             }
         ]).then((updateAns) => {
-            const updateEmp = updateAns.employee;
+            const employee = updateAns.employee;
             // declaring new variable for updated employee array
             const employeeData = [];
-            employeeData.push(updateEmp);
+            employeeData.push(employee);
 
             // Gather Role info
             const roleQuery = `SELECT * FROM roles`;
@@ -313,6 +313,11 @@ updateEmpRole = () => {
                 ]).then(updateAns => {
                     const newRole = updateAns.roles;
                     employeeData.push(newRole);
+
+                    // Fixing Order
+                    let employee = employeeData[0]
+                    employeeData[0] = newRole
+                    employeeData[1] = employee
 
                     const updateEmp = `UPDATE employee SET role_id = ? where id =?`;
                     connection.query(updateEmp, employeeData, (err, res) => {
