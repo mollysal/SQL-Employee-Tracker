@@ -276,4 +276,54 @@ addEmp = () => {
     })
 }
 // Update an Employee Role
+updateEmpRole = () => {
+    // Need to gather an Employee to update
+    const getEmp = `SELECT * FROM employee`;
 
+    // Need to map the employees for Inquirer Prompt
+    connection.query(getEmp, (err, res) => {
+        if (err) throw err;
+        const emp = res.map(({ id, first_name, last_name}) => ({ name: first_name + " " + last_name, value: id}));
+
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'employee',
+                message: 'What Employee do you want to update?',
+                choices: emp
+            }
+        ]).then((updateAns) => {
+            const updateEmp = updateAns.employee;
+            // declaring new variable for updated employee array
+            const employeeData = [];
+            employeeData.push(updateEmp);
+
+            // Gather Role info
+            const roleQuery = `SELECT * FROM roles`;
+
+            connection.query(roleQuery, (err, res) => {
+                const roleChoices = res.map(({ title, id}) => ({ name: title, value: id }));
+                inquirer.prompt([
+                    {
+                        type: 'list',
+                        name: 'roles',
+                        message: "Please update the Employee's Role: ",
+                        choices: roleChoices
+                    }
+                ]).then(updateAns => {
+                    const newRole = updateAns.roles;
+                    employeeData.push(newRole);
+
+                    const updateEmp = `UPDATE employee SET role_id = ? where id =?`;
+                    connection.query(updateEmp, employeeData, (err, res) => {
+                        if (err) throw err;
+                        console.log('--- Employee has been Updated! ---');
+
+                        firstPrompt();
+                    })
+
+                })
+            })
+        })
+    })
+}
