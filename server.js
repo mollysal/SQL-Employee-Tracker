@@ -218,26 +218,62 @@ addEmp = () => {
             type: "input",
             name: "lastName",
             message: "Please enter the last name of the new Employee",
-        },
-        {
-            type: "input",
-            name: "role",
-            message: "Please enter the role of the new Employee",
-        },
-        {
-            type: "input",
-            name: "manager",
-            message: "Please enter the manager of the new Employee",
         }
+        // After Inputting name, the employee needs a role
     ]).then((res) => {
-        let query = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES(?, ?, ?, ?)`;
-        connection.query(query, [res.firstName, res.lastName, res.role_id, res.manager_id], (err, res) => {
-            if (err) { console.log(err) };
-            console.log('Employee Created');
-            firstPrompt();
+        // taking the previous inputs into a variable
+        const empData = [res.firstName, res.lastName];
+        // Need to get Roles from the Roles Table
+        const getRoles = `SELECT roles.id, roles.title FROM roles`;
+        connection.query(getRoles, (err, data) => {
+            if (err) throw (err);
+            // Mapping the roles data into choices for Inquirer Prompt
+            const roles = data.map(({ title, id }) => ({ name: title, value: id }));
+            inquirer.prompt([
+                {
+                    type: "list",
+                    name: "roles",
+                    message: "Please enter the employees role",
+                    choices: roles
+                }
+            ]).then(updatedAns => {
+                // Adding department answer to a variable
+                const roles = updatedAns.roles;
+                // Updating empData (Employee Data) array (From above)
+                empData.push(roles);
+
+                // Gather all from Employee, the new Employee needs a manager
+                const managersQuery = `SELECT * FROM employee`;
+                connection.query(managersQuery, (err, res) => {
+                    if (err) throw err;
+                    // Mapping the manager data into choices for Inquirer Prompt
+                    const managers = res.map(({ id, first_name, last_name }) => ({ name: first_name + " " + last_name, value: id }));
+                    inquirer.prompt([
+                        {
+                            type: "list",
+                            name: "managers",
+                            message: "Please enter the employees manager",
+                            choices: managers
+                        }
+                    ]).then(updatedAns => {
+                        // Adding manager answer to a variable
+                        const manager = updatedAns.manager;
+                        // Updating empData (Employee Data) array (From above)
+                        empData.push(manager);
+
+                        const newEmployee = `INSERT INTO  employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+
+                        connection.query(newEmployee, empData, (err, res) => {
+                            if (err) throw err;
+                            console.log('--- NEW Employee has bee added ---');
+                            firstPrompt();
+                        })
+                    })
+                })
+
+            })
         })
     })
 }
-
 // Update an Employee Role
 
